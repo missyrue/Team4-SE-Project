@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Online Bookstore</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" id="brand">📚 Online Bookstore</a>
+    <nav id="nav" aria-label="Main navigation"></nav>
+  </header>
+
+  <main>
+    <!-- Each screen fills its own <section> from its own JS file -->
+    <section id="view-catalogue"></section>
+    <section id="view-auth" hidden></section>
+    <section id="view-cart" hidden></section>
+    <section id="view-orders" hidden></section>
+    <section id="view-admin" hidden></section>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/catalogue.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/orders.js"></script>
+  <script src="/js/admin.js"></script>
+  <script src="/js/boot.js"></script>
+</body>
+</html>

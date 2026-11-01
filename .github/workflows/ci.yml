@@ -1,0 +1,37 @@
+# Runs on every push (any branch) and on every pull request.
+# It installs the project, then runs ALL unit + integration tests.
+# If a test fails the run turns red and the PR should not be merged.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies (build)
+        run: pip install -r requirements.txt
+
+      - name: Check the app starts (imports every module)
+        run: python -c "from app.main import app; print('app OK, routes:', len(app.routes))"
+
+      - name: Run unit + integration tests with coverage
+        run: pytest --cov=app --cov-report=term-missing --cov-report=xml -v
+
+      - name: Keep the coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml

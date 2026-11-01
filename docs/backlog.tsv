@@ -1,0 +1,39 @@
+key	title	type	sprint	owner	story_points	module	test_cases
+OBS-F-001	Create customer account (unique email + password)	Functional	1	Aanya	3	Authentication	TC-Auth-01
+OBS-F-002	Customer login with valid credentials	Functional	1	Aanya	3	Authentication	TC-Auth-02
+OBS-F-003	Customer logout ends session	Functional	1	Aanya	2	Authentication	TC-Auth-03
+OBS-F-004	Display active books (title, author, price, category, availability)	Functional	1	Aditya	3	Catalogue	TC-Cat-01
+OBS-F-005	Search books by title, author or ISBN	Functional	1	Aditya	3	Catalogue	TC-Cat-02
+OBS-F-006	Filter books by category and price range	Functional	1	Aditya	3	Catalogue	TC-Cat-03
+OBS-F-007	Sort books by title or price	Functional	1	Aditya	2	Catalogue	TC-Cat-04
+OBS-F-008	Book detail page	Functional	1	Aditya	2	Catalogue	TC-Book-01
+OBS-F-009	Add available book + quantity to cart	Functional	1	Aaruni	3	Cart / Checkout	TC-Cart-01
+OBS-F-010	Change quantity / remove item in cart	Functional	1	Aaruni	2	Cart / Checkout	TC-Cart-02
+OBS-F-011	Prevent quantity above available stock	Functional	1	Aaruni	3	Cart / Checkout	TC-Cart-03
+OBS-F-012	Collect delivery address and contact details at checkout	Functional	2	Aaruni	3	Cart / Checkout	TC-Order-01
+OBS-F-013	Calculate order total (prices, delivery, discounts)	Functional	2	Aaruni	3	Cart / Checkout	TC-Order-02
+OBS-F-014	Send payment request to external payment service	Functional	2	Aaruni	5	Payment / Orders	TC-Pay-01
+OBS-F-015	Mark paid only after valid successful payment response	Functional	2	Aaruni	5	Payment / Orders	TC-Pay-02
+OBS-F-016	Unique order number after confirmation	Functional	2	Aaruni	2	Payment / Orders	TC-Order-03
+OBS-F-017	Reduce stock only after confirmed order	Functional	2	Aanya	5	Inventory	TC-Inv-01, TC-Cart-04
+OBS-F-018	Customer order history and status	Functional	2	Aaruni	3	Payment / Orders	TC-Order-04
+OBS-F-019	Customer cancels order before non-cancellable status	Functional	2	Aaruni	3	Payment / Orders	TC-Order-05
+OBS-F-020	Admin adds new book	Functional	2	Aditya	3	Administration	TC-Admin-01
+OBS-F-021	Admin edits / deactivates book	Functional	2	Aditya	3	Administration	TC-Admin-02
+OBS-F-022	Admin creates / updates categories	Functional	2	Aditya	2	Administration	TC-Admin-03
+OBS-F-023	Admin updates stock quantity and reorder level	Functional	2	Aanya	3	Inventory	TC-Inv-02
+OBS-F-024	Identify books at or below reorder level	Functional	2	Aanya	2	Inventory	TC-Inv-03
+OBS-F-025	Admin updates order status	Functional	2	Aditya	3	Administration	TC-Admin-04
+OBS-F-026	Admin sales and inventory reports for a period	Functional	2	Aditya	5	Reporting	TC-Rep-01
+OBS-NF-001	Catalogue/search/detail pages respond within 3 s (p90)	Non-functional	2	Aanya	3	Performance	TC-Perf-01
+OBS-NF-002	99.5% monthly availability (health endpoint + measurement plan)	Non-functional	2	Aditya	2	Reliability	TC-Reliability-01
+OBS-NF-003	First-time user can search and add to cart without training	Non-functional	2	Aanya	2	Usability	TC-UX-01
+OBS-NF-004	Support 10,000 books and 20 concurrent sessions	Non-functional	2	Aanya	5	Scalability	TC-Scale-01
+OBS-NF-005	Usable on desktop, tablet and mobile screen sizes	Non-functional	2	Aanya	3	Usability	TC-UX-02
+OBS-NF-006	Audit trail of administrator changes	Non-functional	2	Aditya	3	Auditability	TC-Audit-01
+OBS-SR-001	Authentication required for protected functions	Security	1	Aanya	3	Authentication	TC-Sec-01
+OBS-SR-002	Passwords stored as salted one-way hashes	Security	1	Aanya	2	Authentication	TC-Sec-02
+OBS-SR-003	Role-based access control (customer vs admin)	Security	2	Aditya	3	Authorization	TC-Sec-03
+OBS-SR-004	Secure (TLS) communication for account/order/payment traffic	Security	2	Aditya	2	Communication	TC-Sec-04
+OBS-SR-005	Validate and sanitise input (account, search, address, admin forms)	Security	1	Aaruni	3	Input validation	TC-Sec-05
+OBS-SR-006	Verify payment-service response before marking paid	Security	2	Aaruni	3	Payment	TC-Sec-06
