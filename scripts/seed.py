@@ -92,9 +92,10 @@ def main() -> None:
             print("Books already exist - skipping book seeding (delete bookstore.db to start fresh).")
         else:
             added = seed_books(db, args.books)
-        ensure_user(db, "admin@bookstore.local", os.getenv("ADMIN_PASSWORD", "Admin@1234"), "Store Admin", "admin")
+        admin_password = os.getenv("ADMIN_PASSWORD", "Admin@1234")
+        ensure_user(db, "admin@bookstore.local", admin_password, "Store Admin", "admin")
         ensure_user(db, "customer@example.com", "Customer@123", "Demo Customer", "customer")
-    print(f"Seeded {added} books. Admin: admin@bookstore.local / Admin@1234")
+    print(f"Seeded {added} books. Admin account: admin@bookstore.local")
 
 
 if __name__ == "__main__":
