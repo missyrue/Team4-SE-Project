@@ -45,3 +45,15 @@ The sprint brief says deviations are allowed if documented and explained at the 
 * `TC-Cart-04` exists in the STP but not in the SRS RTM; OBS-F-017 is therefore covered by `TC-Inv-01` **and** `TC-Cart-04`.
 * The RTM design-spec IDs `DS-Fxxx` are not defined anywhere in the SAD.
 * SAD status is still "Draft"; STP roles table has no names; the ER diagram was an open issue (now `app/models.py`).
+
+## E. Sprint 3 (spill-over period, from 2 November until the development freeze)
+
+Sprint 2 was planned for 26 to 30 Oct. Some Sprint 2 items were finished after that date, in the period that Mini-Project Deliverables Part-3 allows as an optional Sprint 3 for spill-overs. Development, testing and report generation ran in parallel in this period. Development was frozen after the end-to-end tests were merged.
+
+| Item | Planned | Finished | Reason |
+|---|---|---|---|
+| Inventory, checkout, payment, orders | Sprint 2 | Sprint 3 period | Sprint 1 review and documentation took the planned time |
+| Administration, audit log, RBAC | Sprint 2 | Sprint 3 period | Depended on checkout and inventory |
+| Scale and performance tests | Sprint 2 | Sprint 3 period | Needed the final catalogue and admin features |
+| End-to-end tests, traceability matrix | Sprint 2 | Sprint 3 period | Depended on administration |
+| Test reports (unit, system validation, code and branch coverage) | Part-3 | After the freeze | Generated after the last code merge so the numbers are final |
