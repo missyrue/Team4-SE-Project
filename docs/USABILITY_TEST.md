@@ -16,7 +16,7 @@
 
 ## Screen-size check (TC-UX-02): browse, search, cart and checkout work at each size
 | Device / viewport | Browse | Search | Cart | Checkout | 
-|---|---|---|---|---|---|---|
+|---|---|---|---|---|
 | Desktop 1200 px wide | Pass | Pass | Pass | Pass | 
 | Tablet 768 px wide | Pass | Pass | Pass | Pass | 
 | Phone 390 px wide | Pass | Pass | Pass | Pass | 
