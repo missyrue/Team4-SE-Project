@@ -9,7 +9,7 @@ and administrators manage books, stock, orders and reports.
 | Software Architecture & Design (SAD) | 1.0 (14-09-2026) | Layered REST architecture, API design, STRIDE security |
 | Software Test Plan (STP) | 1.0 (16-09-2026) | Test strategy and test-case IDs |
 
-**Status:** Sprint 1 (auth, catalogue, cart) done · Sprint 2 (checkout, payment, orders, inventory, admin, reports) in progress. The sections below describe the planned final system.
+**Status:** Sprint 1 and Sprint 2 complete; development frozen (v1.0). The sections below describe the final system.
 
 Everything in this repo traces back to those three documents (see [`docs/TRACEABILITY.md`](docs/TRACEABILITY.md)).
 Where we differ from them, it is written down in [`docs/DEVIATIONS.md`](docs/DEVIATIONS.md).
