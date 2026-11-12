@@ -1,37 +1,78 @@
-# Runs on every push (any branch) and on every pull request.
-# It installs the project, then runs ALL unit + integration tests.
-# If a test fails the run turns red and the PR should not be merged.
+# CI runs for pull requests and branch pushes. Each run writes a readable
+# Actions summary and keeps its coverage output as a downloadable artifact.
 name: CI
 
 on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Get the code
+      - name: Check out source
+        id: checkout
         uses: actions/checkout@v4
 
-      - name: Install Python
+      - name: Set up Python 3.12
+        id: python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
 
-      - name: Install dependencies (build)
+      - name: Install dependencies
+        id: dependencies
         run: pip install -r requirements.txt
 
-      - name: Check the app starts (imports every module)
+      - name: Smoke-check the app imports
+        id: smoke
         run: python -c "from app.main import app; print('app OK, routes:', len(app.routes))"
 
-      - name: Run unit + integration tests with coverage
-        run: pytest --cov=app --cov-report=term-missing --cov-report=xml -v
+      - name: Run unit and integration tests with coverage
+        id: tests
+        run: |
+          set -o pipefail
+          pytest --cov=app --cov-report=term-missing --cov-report=xml -v 2>&1 | tee test-results.txt
 
-      - name: Keep the coverage report
-        uses: actions/upload-artifact@v4
+      - name: Upload coverage and test output
+        id: artifact
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: coverage-report
-          path: coverage.xml
+          name: ci-reports
+          path: |
+            coverage.xml
+            test-results.txt
+          if-no-files-found: ignore
+
+      - name: Summarize CI actions
+        if: always()
+        env:
+          CHECKOUT_RESULT: ${{ steps.checkout.outcome }}
+          PYTHON_RESULT: ${{ steps.python.outcome }}
+          DEPENDENCIES_RESULT: ${{ steps.dependencies.outcome }}
+          SMOKE_RESULT: ${{ steps.smoke.outcome }}
+          TESTS_RESULT: ${{ steps.tests.outcome }}
+          ARTIFACT_RESULT: ${{ steps.artifact.outcome }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          {
+            echo "## CI run summary"
+            echo
+            echo "**Overall result:** ${JOB_RESULT}"
+            echo "**Commit:** `${GITHUB_SHA}`"
+            echo "**Run:** [#${GITHUB_RUN_NUMBER}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
+            echo
+            echo "| Action | Result |"
+            echo "|---|---|"
+            echo "| Checkout source | ${CHECKOUT_RESULT:-not run} |"
+            echo "| Set up Python 3.12 | ${PYTHON_RESULT:-not run} |"
+            echo "| Install dependencies | ${DEPENDENCIES_RESULT:-not run} |"
+            echo "| App import smoke check | ${SMOKE_RESULT:-not run} |"
+            echo "| Unit and integration tests with coverage | ${TESTS_RESULT:-not run} |"
+            echo "| Upload coverage and test output | ${ARTIFACT_RESULT:-not run} |"
+          } >> "$GITHUB_STEP_SUMMARY"

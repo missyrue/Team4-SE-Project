@@ -30,7 +30,16 @@ Where we differ from them, it is written down in [`docs/DEVIATIONS.md`](docs/DEV
 | API | Python 3 + FastAPI (REST, auto docs at `/docs`) | SAD 3.6: "REST APIs (e.g. Spring Boot **or an equivalent framework**)" |
 | Data | SQLAlchemy ORM + SQLite | SAD 3.6: relational DB behind an ORM; parameterised queries (SR-005) |
 | Tests | pytest + FastAPI TestClient, coverage via pytest-cov | STP levels: unit, integration, system |
-| CI | GitHub Actions (`.github/workflows/ci.yml`) | Build + run all tests on every push / PR |
+| CI/CD | GitHub Actions (`.github/workflows/`) | Test every push / PR; package and publish assets for each GitHub Release |
+
+## GitHub Actions
+
+| Workflow | When it runs | What it does |
+|---|---|---|
+| **CI** (`ci.yml`) | Every push and pull request | Installs dependencies, checks the app imports, runs unit and integration tests with coverage, and saves the coverage XML and test output as an artifact. |
+| **CD - Release bundle** (`cd.yml`) | When a GitHub Release is published, or manually for an existing tag | Builds a ZIP of the tagged source, creates a SHA-256 checksum, and uploads both to the GitHub Release and the workflow artifacts. |
+
+Open a workflow run's **Summary** tab for an overall result and the result of each action in that workflow. The release workflow delivers versioned files as GitHub Release assets; no external hosting target is configured.
 
 ## Run it
 
@@ -82,7 +91,7 @@ tests/
   integration/       API + database together, plus an end-to-end journey
 scripts/             seed.py (demo data), create_issues.sh (backlog -> GitHub issues)
 docs/                SRS/SAD/STP deviations, traceability matrix, backlog, test summary
-.github/workflows/   CI pipeline
+.github/workflows/   CI tests and release delivery workflows
 ```
 
 ## Architecture in one paragraph
