@@ -1,6 +1,5 @@
-# CD publishes a source bundle and checksum as release assets. This project
-# has no external hosting target configured, so the workflow delivers a
-# reproducible, downloadable release instead of deploying to an unknown host.
+# CD delivers release bundles as GitHub Release assets. This project has no
+# external hosting target configured, so it does not deploy to a live server.
 name: CD - Release bundle
 
 on:
@@ -14,64 +13,131 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  package-release:
-    name: Package and publish release assets
+  validate-release:
+    name: Validate release
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.validate.outputs.tag }}
+    steps:
+      - name: Confirm the release exists
+        id: validate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.tag }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          tag="${INPUT_TAG:-${EVENT_TAG:-${REF_NAME}}}"
+          if [[ -z "$tag" ]]; then
+            echo "No release tag was provided." >&2
+            exit 1
+          fi
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      - name: Summarize validation
+        if: always()
+        env:
+          RESULT: ${{ steps.validate.outcome }}
+          TAG: ${{ steps.validate.outputs.tag }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          {
+            echo "## Validate release"
+            echo
+            echo "**Result:** ${JOB_RESULT}"
+            echo "**Release tag:** ${TAG:-unresolved}"
+            echo "**Check release exists:** ${RESULT:-not run}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build-release:
+    name: Build release bundle
+    needs: validate-release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Check out the release tag
         id: checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.tag || github.event.release.tag_name || github.ref }}
+          ref: ${{ needs.validate-release.outputs.tag }}
 
-      - name: Create source archive and SHA-256 checksum
+      - name: Create ZIP and SHA-256 checksum
         id: package
         env:
-          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name || github.ref_name }}
+          RELEASE_TAG: ${{ needs.validate-release.outputs.tag }}
         run: |
           set -euo pipefail
           mkdir -p dist
           git archive --format=zip --prefix="team4-bookstore-${RELEASE_TAG}/" --output="dist/team4-bookstore-${RELEASE_TAG}.zip" "${RELEASE_TAG}"
           sha256sum "dist/team4-bookstore-${RELEASE_TAG}.zip" > "dist/team4-bookstore-${RELEASE_TAG}.zip.sha256"
 
-      - name: Upload release assets to GitHub Release
-        id: publish
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name || github.ref_name }}
-        run: gh release upload "${RELEASE_TAG}" "dist/team4-bookstore-${RELEASE_TAG}.zip" "dist/team4-bookstore-${RELEASE_TAG}.zip.sha256" --clobber
-
-      - name: Upload the bundle as a workflow artifact
+      - name: Pass bundle to publish job
         id: artifact
         uses: actions/upload-artifact@v7
         with:
-          name: release-${{ inputs.tag || github.event.release.tag_name || github.ref_name }}
+          name: release-${{ needs.validate-release.outputs.tag }}
           path: dist/*
 
-      - name: Summarize CD actions
+      - name: Summarize build
         if: always()
         env:
           CHECKOUT_RESULT: ${{ steps.checkout.outcome }}
           PACKAGE_RESULT: ${{ steps.package.outcome }}
-          PUBLISH_RESULT: ${{ steps.publish.outcome }}
           ARTIFACT_RESULT: ${{ steps.artifact.outcome }}
+          RELEASE_TAG: ${{ needs.validate-release.outputs.tag }}
           JOB_RESULT: ${{ job.status }}
-          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name || github.ref_name }}
         run: |
           {
-            echo "## CD release summary"
+            echo "## Build release bundle"
             echo
-            echo "**Overall result:** ${JOB_RESULT}"
-            echo "**Release tag:** `${RELEASE_TAG}`"
-            echo "**Run:** [#${GITHUB_RUN_NUMBER}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
+            echo "**Result:** ${JOB_RESULT}"
+            echo "**Release tag:** ${RELEASE_TAG}"
+            echo "**Checkout:** ${CHECKOUT_RESULT:-not run}"
+            echo "**Create ZIP and checksum:** ${PACKAGE_RESULT:-not run}"
+            echo "**Pass bundle to publish job:** ${ARTIFACT_RESULT:-not run}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  publish-release:
+    name: Publish GitHub Release assets
+    needs: [validate-release, build-release]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download the release bundle
+        id: download
+        uses: actions/download-artifact@v8
+        with:
+          name: release-${{ needs.validate-release.outputs.tag }}
+          path: dist
+
+      - name: Attach ZIP and checksum to the release
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.validate-release.outputs.tag }}
+        run: gh release upload "$RELEASE_TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
+
+      - name: Summarize publishing
+        if: always()
+        env:
+          DOWNLOAD_RESULT: ${{ steps.download.outcome }}
+          PUBLISH_RESULT: ${{ steps.publish.outcome }}
+          RELEASE_TAG: ${{ needs.validate-release.outputs.tag }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          {
+            echo "## Publish GitHub Release assets"
             echo
-            echo "| Action | Result |"
-            echo "|---|---|"
-            echo "| Check out release tag | ${CHECKOUT_RESULT:-not run} |"
-            echo "| Create ZIP and SHA-256 checksum | ${PACKAGE_RESULT:-not run} |"
-            echo "| Upload assets to GitHub Release | ${PUBLISH_RESULT:-not run} |"
-            echo "| Upload workflow artifact | ${ARTIFACT_RESULT:-not run} |"
+            echo "**Result:** ${JOB_RESULT}"
+            echo "**Release tag:** ${RELEASE_TAG}"
+            echo "**Download package from build job:** ${DOWNLOAD_RESULT:-not run}"
+            echo "**Attach assets to release:** ${PUBLISH_RESULT:-not run}"
           } >> "$GITHUB_STEP_SUMMARY"
