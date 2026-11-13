@@ -37,9 +37,9 @@ Where we differ from them, it is written down in [`docs/DEVIATIONS.md`](docs/DEV
 | Workflow | When it runs | What it does |
 |---|---|---|
 | **CI** (`ci.yml`) | Every push and pull request | Installs dependencies, checks the app imports, runs unit and integration tests with coverage, and saves the coverage XML and test output as an artifact. |
-| **CD - Release bundle** (`cd.yml`) | When a GitHub Release is published, or manually for an existing tag | Builds a ZIP of the tagged source, creates a SHA-256 checksum, and uploads both to the GitHub Release and the workflow artifacts. |
+| **CD - Release bundle** (`cd.yml`) | When a GitHub Release is published, or manually for an existing tag | Runs three visible jobs in order: **Validate release → Build release bundle → Publish GitHub Release assets**. Each job adds its result to the workflow summary. |
 
-Open a workflow run's **Summary** tab for an overall result and the result of each action in that workflow. The release workflow delivers versioned files as GitHub Release assets; no external hosting target is configured.
+Open a workflow run's **Summary** tab for each job's action results. The release workflow builds a ZIP and SHA-256 checksum and publishes them as GitHub Release assets; no external hosting target is configured.
 
 ## Run it
 
