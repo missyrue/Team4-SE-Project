@@ -13,6 +13,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
+TEAM_SRNS = [
+    "| Team member | SRN |",
+    "|---|---|",
+    "| Aanya K | PES2UG24CS011 |",
+    "| Aaruni Choudhary | PES2UG24CS013 |",
+    "| Aditya R Badde | PES2UG25CS802 |",
+]
 tmp = Path.home() / "pytest_reports_tmp"
 tmp.mkdir(exist_ok=True)
 junit, covjson = tmp / "junit.xml", tmp / "cov.json"
@@ -70,7 +77,7 @@ def by_file(rows):
 # ---------- 1. unit ----------
 unit = [c for c in cases if c["kind"] == "unit"]
 t, p, f = summary(unit)
-lines = [f"# Unit Test Report", "", f"Date of run: {STAMP}  ",
+lines = ["# Unit Test Report", "", *TEAM_SRNS, "", f"Date of run: {STAMP}  ",
          "Command: `python scripts/generate_test_reports.py` (pytest, tests/unit)", "",
          "## Summary", "", table(["Total", "Passed", "Failed"], [[t, p, f]]), "",
          "Unit tests check one function or service on its own: password hashing, price and discount rules, "
@@ -84,7 +91,7 @@ for fn, rows in by_file(unit).items():
 # ---------- 2. system validation ----------
 sysr = [c for c in cases if c["kind"] != "unit"]
 t, p, f = summary(sysr)
-lines = ["# System Validation Report", "", f"Date of run: {STAMP}  ",
+lines = ["# System Validation Report", "", *TEAM_SRNS, "", f"Date of run: {STAMP}  ",
          "Scope: integration and system tests (tests/integration, tests/test_smoke.py). Each test calls the real "
          "API with a fresh temporary database, so the router, rules and database work together.", "",
          "## Summary", "", table(["Total", "Passed", "Failed"], [[t, p, f]]), "",
@@ -121,7 +128,7 @@ for name, d in sorted(files.items()):
                    ", ".join(map(str, d["missing_lines"])) or "-"])
     rows_b.append([name, s["num_branches"], s["covered_branches"], s["missing_branches"],
                    pct(s["covered_branches"], s["num_branches"])])
-lines = ["# Code Coverage Report", "", f"Date of run: {STAMP}  ", "Tool: coverage.py through pytest-cov, `--cov=app`.", "",
+lines = ["# Code Coverage Report", "", *TEAM_SRNS, "", f"Date of run: {STAMP}  ", "Tool: coverage.py through pytest-cov, `--cov=app`.", "",
          "## Summary", "",
          table(["Statements", "Missed", "Line coverage"],
                [[tot["num_statements"], tot["missing_lines"], pct(tot["covered_lines"], tot["num_statements"])]]), "",
@@ -132,7 +139,7 @@ lines = ["# Code Coverage Report", "", f"Date of run: {STAMP}  ", "Tool: coverag
          "log helper that is exercised through the admin features."]
 (DOCS / "CODE_COVERAGE_REPORT.md").write_text("\n".join(lines), encoding="utf-8")
 
-lines = ["# Branch Coverage Report", "", f"Date of run: {STAMP}  ", "Tool: coverage.py with `--cov-branch`.", "",
+lines = ["# Branch Coverage Report", "", *TEAM_SRNS, "", f"Date of run: {STAMP}  ", "Tool: coverage.py with `--cov-branch`.", "",
          "## Summary", "",
          table(["Branches", "Covered", "Missed", "Branch coverage"],
                [[tot["num_branches"], tot["covered_branches"], tot["missing_branches"],
